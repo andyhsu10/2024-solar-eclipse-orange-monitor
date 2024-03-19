@@ -1,0 +1,28 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "cSpell.words": ["clsx"],
+
+  // Tell VSCode to format files on save
+  "editor.formatOnSave": true,
+  // Tell VSCode to use Prettier as default file formatter
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  "editor.tabSize": 2,
+  "importSorter.generalConfiguration.sortOnBeforeSave": true,
+  // Sort Direction of paths
+  "importSorter.sortConfiguration.importPaths.direction": "asc",
+
+  // Sort Order of paths
+  "importSorter.sortConfiguration.importPaths.order": "caseInsensitive",
+
+  // Combine imports with the same path
+  "importSorter.sortConfiguration.joinImportPaths": true,
+
+  // Removes not used imports where we do not have explicit side effects
+  "importSorter.sortConfiguration.removeUnusedImports": true,
+
+  // Works only if removeUnusedImports enabled. This option will remove default imports if they are not explicitly used in the source code.
+  "importSorter.sortConfiguration.removeUnusedDefaultImports": true
+}
