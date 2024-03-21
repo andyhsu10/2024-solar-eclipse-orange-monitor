@@ -1,7 +1,9 @@
+const { ReadlineParser } = require('@serialport/parser-readline');
 const express = require('express');
 const { SerialPort } = require('serialport');
-const { ReadlineParser } = require('@serialport/parser-readline');
-var db = require('./database.js');
+
+require('dotenv').config();
+const db = require('./database.js');
 
 const app = express();
 app.use(express.json());
@@ -10,12 +12,12 @@ app.use(express.json());
 let port, parser;
 try {
   port = new SerialPort({
-    path: '/dev/cu.usbserial-14330',
-    baudRate: 2000000,
+    path: process.env.SERIAL_PORT_PATH ?? '',
+    baudRate: Number(process.env.BAUD_RATE) ?? 2 * 1000 * 1000, // default = 2M
   });
   parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 } catch (error) {
-  console.error(err);
+  console.error(error);
 }
 
 // API Endpoint to send command and receive response
@@ -29,7 +31,6 @@ app.get('/data', (req, res) => {
     }
 
     const length = getDataNumber(rows.length);
-    console.log({ length, rows: rows.length });
     const interval = rows.length / length;
     const sampledRows = [];
     for (let i = 0; i < length; i += interval) {

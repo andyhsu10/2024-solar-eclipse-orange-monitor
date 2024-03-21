@@ -1,102 +1,126 @@
-import Image from 'next/image';
+'use client';
+
+import {
+    BarElement, CategoryScale, Chart, Legend, LinearScale, LineElement, PointElement, Tooltip
+} from 'chart.js';
+import { useEffect, useState } from 'react';
+import { Line } from 'react-chartjs-2';
+
+import { getData } from '@/lib/api';
+import { AllEnvDataResponse } from '@/types/backend.schema';
+
+Chart.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend);
 
 export default function Home() {
+  const [envData, setEnvData] = useState<{ timestamp: string; temperature: number; humidity: number }[]>([]);
+  const [latestTemperature, setLatestTemperature] = useState<number | undefined>(undefined);
+  const [latestHumidity, setLatestHumidity] = useState<number | undefined>(undefined);
+  const [isCelsius, setIsCelsius] = useState<boolean>(true);
+
+  useEffect(() => {
+    setInterval(() => {
+      getData()
+        .then((result: { data: AllEnvDataResponse }) => {
+          const mappedData = result.data.data.map((d) => {
+            const time = new Date(d.unix_timestamp);
+
+            // Leading zero helper function
+            const pad = (number: number) => number.toString().padStart(2, '0');
+
+            // Format the date and time parts
+            const month = time.getMonth() + 1; // getMonth() returns 0-11
+            const day = time.getDate();
+            const hours = pad(time.getHours());
+            const minutes = pad(time.getMinutes());
+            const seconds = pad(time.getSeconds());
+
+            // Build the formatted string
+            const formattedString = `${month}/${day} ${hours}:${minutes}:${seconds}`;
+
+            return { timestamp: formattedString, temperature: d.temperature, humidity: d.humidity };
+          });
+          setEnvData(mappedData);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }, 1000);
+  }, []);
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200  lg:p-4">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By <Image src="/vercel.svg" alt="Vercel Logo" width={100} height={24} priority />
-          </a>
+      <div className="z-10 flex min-h-[28rem] w-full max-w-6xl flex-col items-center justify-between gap-4 font-mono text-sm md:flex-row">
+        <div className="basis-1/4"></div>
+        <div className="h-full basis-3/4">
+          <Line
+            data={{
+              labels: envData.map((d) => d.timestamp),
+              datasets: [
+                {
+                  label: `Temperature (${isCelsius ? '°C' : '°F'})`,
+                  borderColor: 'rgb(255, 99, 132)',
+                  backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                  data: envData.map((d) => {
+                    if (isCelsius) return d.temperature;
+
+                    return Number(1.8 * d.temperature + 32).toFixed(2);
+                  }),
+                  yAxisID: 'y',
+                },
+                {
+                  label: 'Humidity (%)',
+                  borderColor: 'rgb(53, 162, 235)',
+                  backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                  data: envData.map((d) => d.humidity),
+                  yAxisID: 'y1',
+                },
+              ],
+            }}
+            options={{
+              responsive: true,
+              interaction: {
+                mode: 'index' as const,
+                intersect: false,
+              },
+              plugins: {
+                title: {
+                  display: true,
+                  text: 'Chart.js Line Chart - Multi Axis',
+                },
+              },
+              scales: {
+                x: {
+                  grid: {
+                    drawOnChartArea: false,
+                  },
+                  ticks: { maxTicksLimit: 6 },
+                },
+                y: {
+                  type: 'linear' as const,
+                  display: true,
+                  position: 'left' as const,
+                },
+                y1: {
+                  type: 'linear' as const,
+                  display: true,
+                  position: 'right' as const,
+                  grid: {
+                    drawOnChartArea: false,
+                  },
+                },
+              },
+              elements: {
+                line: {
+                  cubicInterpolationMode: 'monotone',
+                },
+                point: {
+                  radius: 1,
+                  hoverRadius: 2.5,
+                },
+              },
+            }}
+          />
         </div>
-      </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-balance text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
       </div>
     </main>
   );
