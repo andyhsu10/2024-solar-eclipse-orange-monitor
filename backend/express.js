@@ -28,9 +28,20 @@ app.get('/data', (req, res) => {
       return;
     }
 
+    const length = getDataNumber(rows.length);
+    console.log({ length, rows: rows.length });
+    const interval = rows.length / length;
+    const sampledRows = [];
+    for (let i = 0; i < length; i += interval) {
+      sampledRows.push(rows[Math.floor(i)]);
+
+      // Ensure exactly sampleSize elements are added
+      if (sampledRows.length >= length) break;
+    }
+
     res.json({
       success: true,
-      data: rows,
+      data: sampledRows,
     });
   });
 });
@@ -62,10 +73,9 @@ app.post('/data', (req, res) => {
             res.send({
               success: true,
               data: {
-                timestamp: now.getTime(),
+                unix_timestamp: now.getTime(),
                 temperature,
                 humidity,
-                result,
               },
             });
             return;
@@ -80,3 +90,11 @@ const serverPort = 3001; // Ensure this does not conflict with your Next.js port
 app.listen(serverPort, () => {
   console.log(`Server listening on port ${serverPort}`);
 });
+
+const getDataNumber = (num) => {
+  if (num <= 0) return num;
+  if (num < 100) return num;
+
+  const magnitude = Math.floor(Math.log10(num));
+  return Math.pow(10, magnitude);
+};
