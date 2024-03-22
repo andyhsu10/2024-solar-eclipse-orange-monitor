@@ -1,6 +1,9 @@
 const { ReadlineParser } = require('@serialport/parser-readline');
 const express = require('express');
+const fs = require('fs');
 const { SerialPort } = require('serialport');
+
+const BACKUP_MINUTES = Number(process.env.BACKUP_MINUTES ?? 2);
 
 require('dotenv').config();
 const db = require('./database.js');
@@ -70,6 +73,25 @@ setInterval(
     });
   },
   1000 / Number(process.env.SAMPLING_RATE) ?? 2,
+);
+
+// Backup
+setInterval(
+  () => {
+    const now = new Date();
+    const sourceFilePath = 'db.sqlite';
+    const destinationFilePath = `backend/backup/${now.getTime()}.backup.sqlite`;
+
+    // Copy the file
+    fs.copyFile(sourceFilePath, destinationFilePath, (err) => {
+      if (err) {
+        console.error(`${now.getTime()} - Failed to backup SQLite file.`, error);
+        return;
+      }
+      console.log(`${now.getTime()} - SQLite file backup successfully.`);
+    });
+  },
+  BACKUP_MINUTES * 60 * 1000,
 );
 
 const serverPort = 3001; // Ensure this does not conflict with your Next.js port
