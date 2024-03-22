@@ -32,3 +32,7 @@ To learn more about Next.js, take a look at the following resources:
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+
+## Infrastructure Design
+
+![2024 Total Solar Eclipse Infrastructure](https://github.com/andyhsu10/2024-solar-eclipse-orange-monitor/assets/12019694/5237e27c-fc79-4444-b2f4-8783f411e034)
