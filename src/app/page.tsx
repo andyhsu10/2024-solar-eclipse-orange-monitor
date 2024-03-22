@@ -8,6 +8,9 @@ import { getData } from '@/lib/api';
 import { AllEnvDataResponse } from '@/types/backend.schema';
 import { faDroplet, faTemperatureHalf } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Switch } from '@headlessui/react';
+
+type Data = { timestamp: string; temperature: number; humidity: number; unixTimestamp: number };
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend);
 
@@ -16,17 +19,17 @@ const toFahrenheit = (celsius: number) => {
 };
 
 export default function Home() {
-  const [envData, setEnvData] = useState<{ timestamp: string; temperature: number; humidity: number }[]>([]);
+  const [envData, setEnvData] = useState<Data[]>([]);
   const [latestTemperature, setLatestTemperature] = useState<number | undefined>(undefined);
   const [latestHumidity, setLatestHumidity] = useState<number | undefined>(undefined);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | undefined>(undefined);
   const [isCelsius, setIsCelsius] = useState<boolean>(true);
+  const [isExpired, setIsExpired] = useState<boolean>(false);
 
   useEffect(() => {
     setInterval(() => {
       getData()
         .then((result: AllEnvDataResponse) => {
-          console.log(result);
           const mappedData = result.data.map((d) => {
             const time = new Date(d.unix_timestamp);
 
@@ -43,7 +46,12 @@ export default function Home() {
             // Build the formatted string
             const formattedString = `${month}/${day} ${hours}:${minutes}:${seconds}`;
 
-            return { timestamp: formattedString, temperature: d.temperature, humidity: d.humidity };
+            return {
+              timestamp: formattedString,
+              temperature: d.temperature,
+              humidity: d.humidity,
+              unixTimestamp: d.unix_timestamp,
+            };
           });
           const lastData = mappedData.at(-1);
 
@@ -51,6 +59,7 @@ export default function Home() {
           setLatestTemperature(lastData?.temperature);
           setLatestHumidity(lastData?.humidity);
           setLastUpdatedAt(lastData?.timestamp);
+          setIsExpired(lastData ? new Date().getDate() - lastData.unixTimestamp > 60 * 1000 : true);
         })
         .catch((error) => {
           console.error(error);
@@ -62,10 +71,24 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <div className="z-10 flex min-h-[28rem] w-full max-w-6xl flex-col gap-6 md:flex-row">
         <div className="flex flex-col gap-4 pt-2 md:basis-1/4">
-          <div className="-mb-3">
-            <button className="button mb-2 rounded bg-blue-500 p-2 text-white" onClick={() => setIsCelsius(!isCelsius)}>
-              C 🉑 F
-            </button>
+          <div className="-mb-2 flex items-center justify-center">
+            <div className="flex items-center gap-2">
+              <span className="font-sans text-xl font-medium">°C</span>
+              <Switch
+                checked={!isCelsius}
+                onChange={() => setIsCelsius(!isCelsius)}
+                className={`${!isCelsius ? 'bg-[#ff6384]' : 'bg-stone-400'}
+          relative inline-flex h-[1.5rem] w-[2.75rem] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2  focus-visible:ring-white/75`}
+              >
+                <span className="sr-only">Use setting</span>
+                <span
+                  aria-hidden="true"
+                  className={`${!isCelsius ? 'translate-x-5' : 'translate-x-0'}
+            pointer-events-none inline-block h-[1.25rem] w-[1.25rem] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out`}
+                />
+              </Switch>
+              <span className="font-sans text-xl font-medium">°F</span>
+            </div>
           </div>
 
           <div className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 p-2">
@@ -83,7 +106,9 @@ export default function Home() {
               {latestHumidity ? `${latestHumidity} %` : 'N/A'}
             </p>
           </div>
-          <p className="-mt-3 font-sans text-sm text-gray-500">Updated at: {lastUpdatedAt ?? 'N/A'}</p>
+          <p className={`-mt-3 font-sans text-sm ${isExpired ? 'text-red-600' : 'text-gray-500'}`}>
+            Updated at: {lastUpdatedAt ?? 'N/A'}
+          </p>
         </div>
 
         <div className="h-full md:basis-3/4">
