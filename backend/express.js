@@ -30,72 +30,56 @@ app.get('/data', (req, res) => {
       return;
     }
 
-    const length = getDataNumber(rows.length);
-    const interval = rows.length / length;
+    const interval = getInterval(rows.length);
     const sampledRows = [];
-    for (let i = 0; i < length; i += interval) {
-      sampledRows.push(rows[Math.floor(i)]);
-
-      // Ensure exactly sampleSize elements are added
-      if (sampledRows.length >= length) break;
+    for (let i = rows.length - 1; i >= 0; i -= interval) {
+      sampledRows.push(rows[i]);
     }
 
     res.json({
       success: true,
-      data: sampledRows,
+      data: sampledRows.reverse(),
     });
   });
 });
 
-app.post('/data', (req, res) => {
-  const now = new Date();
+setInterval(
+  () => {
+    const now = new Date();
 
-  // Write command to the Arduino board
-  port.write(':I#', (err) => {
-    if (err) {
-      res.status(500).send({ success: false, message: err });
-      return;
-    }
-
-    // Listen for a single line of data from the Arduino (assuming response ends with newline)
-    parser.once('data', (data) => {
-      const info = data.split(',');
-      if (info.length >= 3) {
-        const temperature = Number(info[1]);
-        const humidity = Number(info[2]);
-
-        const insert = 'INSERT INTO environmental_data (unix_timestamp, temperature, humidity) VALUES (?,?,?)';
-        db.run(insert, [now.getTime(), temperature, humidity], (err, result) => {
-          if (err) {
-            console.error(err);
-            res.status(500).send({ success: false, message: 'Something went wrong when inserting data.' });
-            return;
-          } else {
-            res.send({
-              success: true,
-              data: {
-                unix_timestamp: now.getTime(),
-                temperature,
-                humidity,
-              },
-            });
-            return;
-          }
-        });
+    // Write command to the Arduino board
+    port.write(':I#', (err) => {
+      if (err) {
+        res.status(500).send({ success: false, message: err });
+        return;
       }
+
+      // Listen for a single line of data from the Arduino (assuming response ends with newline)
+      parser.once('data', (data) => {
+        const info = data.split(',');
+        if (info.length >= 3) {
+          const temperature = Number(info[1]);
+          const humidity = Number(info[2]);
+
+          const insert = 'INSERT INTO environmental_data (unix_timestamp, temperature, humidity) VALUES (?,?,?)';
+          db.run(insert, [now.getTime(), temperature, humidity], (err, result) => {
+            if (err) console.error(err);
+          });
+        }
+      });
     });
-  });
-});
+  },
+  1000 / Number(process.env.SAMPLING_RATE) ?? 2,
+);
 
 const serverPort = 3001; // Ensure this does not conflict with your Next.js port
 app.listen(serverPort, () => {
   console.log(`Server listening on port ${serverPort}`);
 });
 
-const getDataNumber = (num) => {
-  if (num <= 0) return num;
-  if (num < 100) return num;
+const getInterval = (num) => {
+  if (num <= 1000) return 1;
 
-  const magnitude = Math.floor(Math.log10(num));
-  return Math.pow(10, magnitude);
+  const interval = Math.floor(Math.log10(num)) - 1;
+  return interval;
 };
