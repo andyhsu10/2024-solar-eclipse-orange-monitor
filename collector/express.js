@@ -94,6 +94,8 @@ setInterval(
   BACKUP_MINUTES * 60 * 1000,
 );
 
+// TODO: POST data to remote server and record success or not
+
 const serverPort = 3001; // Ensure this does not conflict with your Next.js port
 app.listen(serverPort, () => {
   console.log(`Server listening on port ${serverPort}`);
