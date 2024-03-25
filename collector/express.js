@@ -80,12 +80,12 @@ setInterval(
   () => {
     const now = new Date();
     const sourceFilePath = 'db.sqlite';
-    const destinationFilePath = `backend/backup/${now.getTime()}.backup.sqlite`;
+    const destinationFilePath = `collector/backup/${now.getTime()}.backup.sqlite`;
 
     // Copy the file
     fs.copyFile(sourceFilePath, destinationFilePath, (err) => {
       if (err) {
-        console.error(`${now.getTime()} - Failed to backup SQLite file.`, error);
+        console.error(`${now.getTime()} - Failed to backup SQLite file.`, err);
         return;
       }
       console.log(`${now.getTime()} - SQLite file backup successfully.`);
