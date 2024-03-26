@@ -3,6 +3,7 @@ import json
 from flask import Blueprint, jsonify, request
 
 from src.config import settings
+from src.firestore import db
 
 data_bp = Blueprint("blueprint", __name__)
 
@@ -16,7 +17,7 @@ def create_data():
 
     data = request.json
     if not data:
-        return jsonify({"error": "Empty or invalid JSON data"}), 400
+        return jsonify({"error": "Empty JSON data"}), 400
 
     # Recompute checksum for validation
     payload_str = json.dumps(data, sort_keys=True, separators=(",", ":"))
@@ -34,13 +35,31 @@ def create_data():
     pressure = data.get("p")
 
     if (
-        type(timestamp) == int
-        and type(temperature) == float
-        and type(humidity) == float
-        and type(pressure) == float
+        isinstance(timestamp, (int, float))
+        and isinstance(temperature, (int, float))
+        and isinstance(humidity, (int, float))
+        and isinstance(pressure, (int, float))
     ):
-        print("Received data:", data)
+        doc = db.collection(f"environmental_data_{settings.ENVIRONMENT}").document(
+            str(timestamp)
+        )
+        doc_snapshot = doc.get()
+        if not doc_snapshot.exists:
+            doc.set(
+                {
+                    "t": temperature,
+                    "h": humidity,
+                    "p": pressure,
+                    "version": settings.DATA_VERSION,
+                }
+            )
+            last_three_digits = timestamp % 1000
+            if last_three_digits < 500:
+                # TODO: upload to GCS
+                print(timestamp, last_three_digits)
+                pass
+
         return jsonify({"message": "Data processed successfully"}), 200
 
     # Return a response
-    return jsonify({"error": "Empty or invalid JSON data"}), 400
+    return jsonify({"error": "Invalid JSON data"}), 400
