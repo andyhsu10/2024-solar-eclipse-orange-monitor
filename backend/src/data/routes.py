@@ -1,6 +1,8 @@
 import hashlib
 import json
+import math
 from flask import Blueprint, jsonify, request
+from google.cloud.firestore import FieldFilter
 
 from src.config import settings
 from src.firestore import db
@@ -10,6 +12,7 @@ data_bp = Blueprint("blueprint", __name__)
 
 @data_bp.route("", methods=["GET", "POST"])
 def get_or_create_data():
+    data_ref = db.collection(f"environmental_data_{settings.ENVIRONMENT}")
     # [POST] /data
     if request.method == "POST":
         auth_secret = request.headers.get("Authorization")
@@ -42,9 +45,7 @@ def get_or_create_data():
             and isinstance(humidity, (int, float))
             and isinstance(pressure, (int, float))
         ):
-            doc = db.collection(f"environmental_data_{settings.ENVIRONMENT}").document(
-                str(timestamp)
-            )
+            doc = data_ref.document(str(timestamp))
             doc_snapshot = doc.get()
             if not doc_snapshot.exists:
                 doc.set(
@@ -52,7 +53,7 @@ def get_or_create_data():
                         "t": temperature,
                         "h": humidity,
                         "p": pressure,
-                        "version": settings.DATA_VERSION,
+                        "vs": settings.DATA_VERSION,
                     }
                 )
                 last_three_digits = timestamp % 1000
@@ -67,4 +68,27 @@ def get_or_create_data():
         return jsonify({"error": "Invalid JSON data"}), 400
 
     # [GET] /data
-    return jsonify({"success": True, "data": []}), 200
+    data = (
+        data_ref.where(filter=FieldFilter("version", "==", settings.DATA_VERSION))
+    ).get()
+    interval = get_interval(len(data))
+    response_data = list()
+    for i in range(len(data) - 1, -1, -interval):
+        d = data[i].to_dict()
+        response_data.append(
+            {
+                "t": d.get("t"),
+                "ts": int(data[i].id),
+                "h": d.get("h"),
+                "p": d.get("p"),
+            }
+        )
+    return jsonify({"success": True, "data": response_data}), 200
+
+
+def get_interval(num: int) -> int:
+    if num <= 1000:
+        return 1
+
+    interval = math.floor(math.log10(num)) - 1
+    return interval
