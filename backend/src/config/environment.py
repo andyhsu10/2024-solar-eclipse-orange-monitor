@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     PORT: int = 8080
 
     API_SECRET: str
+    DATA_VERSION: float
 
     GCP_PROJECT_ID: str
     GCS_BUCKET_NAME: str
