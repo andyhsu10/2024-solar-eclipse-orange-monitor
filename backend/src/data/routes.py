@@ -3,19 +3,18 @@ import json
 import math
 import os
 from flask import Blueprint, jsonify, request
-from google.cloud.firestore import FieldFilter
+from google.cloud.firestore import FieldFilter, Query
 
 from src.cloud_storage import bucket
 from src.config import settings
 from src.firestore import db
 
 data_bp = Blueprint("blueprint", __name__)
+data_ref = db.collection(f"environmental_data_{settings.ENVIRONMENT}")
 
 
 @data_bp.route("", methods=["GET", "POST"])
 def get_or_create_data():
-    data_ref = db.collection(f"environmental_data_{settings.ENVIRONMENT}")
-
     def get_response_data():
         data = (
             data_ref.where(filter=FieldFilter("vs", "==", settings.DATA_VERSION))
@@ -79,6 +78,7 @@ def get_or_create_data():
                 doc.set(
                     {
                         "t": temperature,
+                        "ts": timestamp,
                         "h": humidity,
                         "p": pressure,
                         "vs": settings.DATA_VERSION,
@@ -114,6 +114,35 @@ def get_or_create_data():
 
     # [GET] /data
     response = get_response_data()
+    return jsonify(response), 200
+
+
+@data_bp.route("latest", methods=["GET"])
+def get_latest_data():
+    query = (
+        (data_ref.where(filter=FieldFilter("vs", "==", settings.DATA_VERSION)))
+        .order_by("ts", direction=Query.DESCENDING)
+        .limit(1)
+        .get()
+    )
+    if len(query) == 0:
+        response = {
+            "success": True,
+            "data": None,
+        }
+    else:
+        snapshot = query[0]
+        data = snapshot.to_dict()
+        response = {
+            "success": True,
+            "data": {
+                "t": data.get("t"),
+                "ts": data.get("ts"),
+                "h": data.get("h"),
+                "p": data.get("p"),
+            },
+        }
+
     return jsonify(response), 200
 
 
