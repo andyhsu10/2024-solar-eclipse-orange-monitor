@@ -46,12 +46,14 @@ export default function Widget() {
       .then((result: LatestEnvDataResponse) => {
         const data = result.data;
 
-        setEnvData({
-          unixTimestamp: data.ts,
-          temperature: data.t,
-          humidity: data.h,
-          pressure: data.p,
-        });
+        if (data) {
+          setEnvData({
+            unixTimestamp: data.ts,
+            temperature: data.t,
+            humidity: data.h,
+            pressure: data.p,
+          });
+        }
       })
       .catch((error) => {
         console.error(error);
