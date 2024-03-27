@@ -9,7 +9,7 @@ import { Line } from 'react-chartjs-2';
 import { getData } from '@/lib/api';
 import { pad } from '@/lib/utils';
 import { AllEnvDataResponse } from '@/types/backend.schema';
-import { faDroplet, faTemperatureHalf } from '@fortawesome/free-solid-svg-icons';
+import { faDroplet, faTemperatureHalf, faWind } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Switch } from '@headlessui/react';
 
@@ -31,6 +31,7 @@ export default function Home() {
   const [envData, setEnvData] = useState<Data[]>([]);
   const [latestTemperature, setLatestTemperature] = useState<number | undefined>(undefined);
   const [latestHumidity, setLatestHumidity] = useState<number | undefined>(undefined);
+  const [latestPressure, setLatestPressure] = useState<number | undefined>(undefined);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | undefined>(undefined);
   const [isCelsius, setIsCelsius] = useState<boolean>(true);
   const [isExpired, setIsExpired] = useState<boolean>(false);
@@ -64,6 +65,7 @@ export default function Home() {
         setEnvData(mappedData);
         setLatestTemperature(lastData?.temperature);
         setLatestHumidity(lastData?.humidity);
+        setLatestPressure(lastData?.pressure);
         setLastUpdatedAt(lastData?.timestamp);
         setIsExpired(lastData ? new Date().getDate() - lastData.unixTimestamp > 60 * 1000 : true);
       })
@@ -84,8 +86,8 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-stone-200 p-24">
-      <div className="z-10 flex min-h-[28rem] w-full max-w-6xl flex-col gap-6 md:flex-row">
-        <div className="flex flex-col gap-4 pt-2 md:basis-1/4">
+      <div className="z-10 flex min-h-[36rem] w-full max-w-6xl flex-col gap-8 md:flex-row">
+        <div className="flex flex-col gap-5 pt-2 md:basis-1/4">
           <div className="-mb-2 flex items-center justify-center">
             <div className="flex items-center gap-2">
               <span className="font-sans text-xl font-medium">°C</span>
@@ -106,96 +108,160 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 p-2">
-            <FontAwesomeIcon icon={faTemperatureHalf} className="text-5xl text-[#ff6384]" fixedWidth />
-            <p className="font-sans text-4xl font-semibold tracking-wide">
+          <div className="flex max-h-[8rem] flex-1 items-center justify-center gap-2 overflow-hidden rounded-lg border border-gray-300 p-2">
+            <FontAwesomeIcon icon={faTemperatureHalf} className="text-4xl text-[#ff6384]" fixedWidth />
+            <p className="font-sans text-3xl font-semibold tracking-wide">
               {latestTemperature
                 ? `${isCelsius ? latestTemperature : toFahrenheit(latestTemperature)} ${isCelsius ? '°C' : '°F'}`
                 : 'N/A'}
             </p>
           </div>
 
-          <div className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 p-2">
-            <FontAwesomeIcon icon={faDroplet} className="text-5xl text-[#35a2eb]" fixedWidth />
-            <p className="font-sans text-4xl font-semibold tracking-wide">
+          <div className="flex max-h-[8rem] flex-1 items-center justify-center gap-2 overflow-hidden rounded-lg border border-gray-300 p-2">
+            <FontAwesomeIcon icon={faDroplet} className="text-4xl text-[#35a2eb]" fixedWidth />
+            <p className="font-sans text-3xl font-semibold tracking-wide">
               {latestHumidity ? `${latestHumidity} %` : 'N/A'}
             </p>
           </div>
-          <p className={`-mt-3 font-sans text-sm ${isExpired ? 'text-red-600' : 'text-gray-500'}`}>
+
+          <div className="flex max-h-[8rem] flex-1 items-center justify-center gap-2 overflow-hidden rounded-lg border border-gray-300 p-2">
+            <FontAwesomeIcon icon={faWind} className="text-4xl text-green-500" fixedWidth />
+            <p className="font-sans text-3xl font-semibold tracking-wide">
+              {latestPressure ? `${latestPressure} hPa` : 'N/A'}
+            </p>
+          </div>
+          <p
+            className={`-mt-3 text-center font-sans text-sm md:text-left ${isExpired ? 'text-red-600' : 'text-gray-500'}`}
+          >
             Updated at: {lastUpdatedAt ?? 'N/A'}
           </p>
         </div>
 
-        <div className="h-full md:basis-3/4">
-          <Line
-            data={{
-              labels: envData.map((d) => d.timestamp),
-              datasets: [
-                {
-                  label: `Temperature (${isCelsius ? '°C' : '°F'})`,
-                  borderColor: 'rgb(255, 99, 132)',
-                  backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                  data: envData.map((d) => {
-                    if (isCelsius) return d.temperature;
+        <div className="flex h-full flex-col gap-6 md:basis-3/4">
+          <div className="flex-1">
+            <Line
+              data={{
+                labels: envData.map((d) => d.timestamp),
+                datasets: [
+                  {
+                    label: `Temperature (${isCelsius ? '°C' : '°F'})`,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    data: envData.map((d) => {
+                      if (isCelsius) return d.temperature;
 
-                    return toFahrenheit(d.temperature);
-                  }),
-                  yAxisID: 'y',
-                },
-                {
-                  label: 'Humidity (%)',
-                  borderColor: 'rgb(53, 162, 235)',
-                  backgroundColor: 'rgba(53, 162, 235, 0.5)',
-                  data: envData.map((d) => d.humidity),
-                  yAxisID: 'y1',
-                },
-              ],
-            }}
-            options={{
-              animation: { duration: 0 },
-              responsive: true,
-              interaction: {
-                mode: 'index' as const,
-                intersect: false,
-              },
-              plugins: {
-                title: {
-                  display: true,
-                  text: '',
-                },
-              },
-              scales: {
-                x: {
-                  grid: {
-                    drawOnChartArea: false,
+                      return toFahrenheit(d.temperature);
+                    }),
+                    yAxisID: 'y',
                   },
-                  ticks: { maxTicksLimit: 6 },
+                  {
+                    label: 'Humidity (%)',
+                    borderColor: 'rgb(53, 162, 235)',
+                    backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                    data: envData.map((d) => d.humidity),
+                    yAxisID: 'y1',
+                  },
+                ],
+              }}
+              options={{
+                animation: { duration: 0 },
+                responsive: true,
+                interaction: {
+                  mode: 'index' as const,
+                  intersect: false,
                 },
-                y: {
-                  type: 'linear' as const,
-                  display: true,
-                  position: 'left' as const,
-                },
-                y1: {
-                  type: 'linear' as const,
-                  display: true,
-                  position: 'right' as const,
-                  grid: {
-                    drawOnChartArea: false,
+                plugins: {
+                  title: {
+                    display: true,
+                    text: '',
                   },
                 },
-              },
-              elements: {
-                line: {
-                  cubicInterpolationMode: 'monotone',
+                scales: {
+                  x: {
+                    grid: {
+                      drawOnChartArea: false,
+                    },
+                    ticks: { maxTicksLimit: 6 },
+                  },
+                  y: {
+                    type: 'linear' as const,
+                    display: true,
+                    position: 'left' as const,
+                  },
+                  y1: {
+                    type: 'linear' as const,
+                    display: true,
+                    position: 'right' as const,
+                    grid: {
+                      drawOnChartArea: false,
+                    },
+                  },
                 },
-                point: {
-                  radius: 1,
-                  hoverRadius: 2.5,
+                elements: {
+                  line: {
+                    cubicInterpolationMode: 'monotone',
+                  },
+                  point: {
+                    radius: 1,
+                    hoverRadius: 2.5,
+                  },
                 },
-              },
-            }}
-          />
+              }}
+            />
+          </div>
+
+          <div className="flex-1">
+            <Line
+              data={{
+                labels: envData.map((d) => d.timestamp),
+                datasets: [
+                  {
+                    label: 'Atmospheric pressure (hPa)',
+                    borderColor: 'rgb(34, 197, 94)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                    data: envData.map((d) => d.pressure),
+                    yAxisID: 'y',
+                  },
+                ],
+              }}
+              options={{
+                animation: { duration: 0 },
+                responsive: true,
+                interaction: {
+                  mode: 'index' as const,
+                  intersect: false,
+                },
+                plugins: {
+                  title: {
+                    display: true,
+                    text: '',
+                  },
+                },
+                scales: {
+                  x: {
+                    grid: {
+                      drawOnChartArea: false,
+                    },
+                    ticks: { maxTicksLimit: 6 },
+                  },
+                  y: {
+                    type: 'linear' as const,
+                    display: true,
+                    position: 'left' as const,
+                  },
+                },
+                elements: {
+                  line: {
+                    cubicInterpolationMode: 'monotone',
+                  },
+                  point: {
+                    radius: 1,
+                    hoverRadius: 2.5,
+                  },
+                },
+              }}
+            />
+          </div>
         </div>
       </div>
     </main>
