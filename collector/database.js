@@ -13,9 +13,12 @@ const db = new sqlite3.Database(DB_SOURCE, (err) => {
       `CREATE TABLE environmental_data (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         unix_timestamp BIGINT UNIQUE,
         temperature REAL CHECK(temperature >= -273.15 AND temperature <= 999.99),
-        humidity REAL CHECK(humidity >= 0.00 AND humidity <= 100.00)
+        humidity REAL CHECK(humidity >= 0.00 AND humidity <= 100.00),
+        pressure REAL CHECK(pressure >= 0.00 AND pressure <= 1200.00),
+        uploaded BOOLEAN DEFAULT FALSE
       );
     
       CREATE INDEX idx_unix_timestamp ON environmental_data (unix_timestamp ASC);`,
