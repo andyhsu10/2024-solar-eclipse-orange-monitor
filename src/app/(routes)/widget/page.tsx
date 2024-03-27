@@ -1,5 +1,7 @@
 'use client';
 
+import 'moment-timezone';
+
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 
@@ -40,6 +42,7 @@ export default function Widget() {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [currentPhase, setCurrentPhase] = useState<Phase | undefined>(undefined);
   const [phaseCountdown, setPhaseCountdown] = useState<Countdown>({ seconds: 0, minutes: 0, hours: 0 });
+  const [utcOffset, setUtcOffset] = useState<number>(0);
 
   const fetchLatestData = () => {
     getLatestData()
@@ -93,6 +96,9 @@ export default function Widget() {
       fetchLatestData();
     }, 10 * 1000);
 
+    // Set UTC Offset
+    setUtcOffset(moment().utcOffset() / 60);
+
     // Clean up the interval on component unmount
     return () => {
       clearInterval(timePhaseInterval);
@@ -102,9 +108,19 @@ export default function Widget() {
 
   return (
     <main className="flex h-screen w-screen items-center justify-center p-4">
-      <div className="h-52 w-72 rounded-2xl border border-gray-300 bg-gray-300 p-4 font-mono text-xl">
+      <div className="h-52 w-72 overflow-hidden rounded-2xl border border-gray-300 bg-gray-300 p-4 font-mono text-xl">
         <p className="font-sans font-bold">2024 北美日全食</p>
-        <p>{moment(currentTime).format('hh:mm:ss')} (UTC -5)</p>
+        <p>
+          {moment(currentTime).format('hh:mm:ss')} (
+          <span className="inline-flex gap-2">
+            UTC
+            <span>
+              {utcOffset >= 0 ? '+' : ''}
+              {utcOffset}
+            </span>
+          </span>
+          )
+        </p>
         <p>
           {currentPhase ? (
             <>
