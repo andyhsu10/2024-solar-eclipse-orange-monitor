@@ -47,7 +47,7 @@ jobs:
         uses: 'google-github-actions/deploy-cloudrun@v1'
         with:
           service: ${{ vars.GCP_CLOUD_RUN_NAME }}
-          region: us-west1
+          region: us-east4
           image: '${{ vars.GCP_GAR_REGISTRY }}/${{ vars.GCP_GAR_IMG_NAME }}:${{ github.sha }}'
           env_vars: |
             API_SECRET=${{ secrets.API_SECRET }}
