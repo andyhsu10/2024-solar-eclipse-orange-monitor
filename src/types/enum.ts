@@ -11,11 +11,9 @@ export const enum RequestMethod {
 export const ServerApiUrl = Object.freeze({
   [RequestMethod.GET]: {
     getAllData: () => `${env.API_BASE_URL}/data`,
+    getLatestData: () => `${env.API_BASE_URL}/data/latest`,
   },
-  [RequestMethod.POST]: {
-    createData: () => `${env.API_BASE_URL}/data`,
-    backup: () => `${env.API_BASE_URL}/backup`,
-  },
+  [RequestMethod.POST]: {},
   [RequestMethod.PATCH]: {},
   [RequestMethod.PUT]: {},
   [RequestMethod.DELETE]: {},

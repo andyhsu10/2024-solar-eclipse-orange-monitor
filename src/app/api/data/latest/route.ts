@@ -1,14 +1,14 @@
 'use server';
-import { AllEnvDataResponse } from '@/types/backend.schema';
+import { LatestEnvDataResponse } from '@/types/backend.schema';
 import { RequestMethod, ServerApiUrl } from '@/types/enum';
 
 export async function GET(req: Request) {
   try {
-    const response = await fetch(`${ServerApiUrl[RequestMethod.GET].getAllData()}`, {
+    const response = await fetch(`${ServerApiUrl[RequestMethod.GET].getLatestData()}`, {
       next: { revalidate: 0.8 },
     });
 
-    const data = AllEnvDataResponse.parse(await response.json());
+    const data = LatestEnvDataResponse.parse(await response.json());
 
     return Response.json({ success: true, data: data.data });
   } catch (err) {

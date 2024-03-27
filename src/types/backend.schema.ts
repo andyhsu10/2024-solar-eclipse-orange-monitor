@@ -22,5 +22,7 @@ export const EnvData = z.object({
 export const AllEnvData = z.array(EnvData);
 
 export const AllEnvDataResponse = ApiSuccessResponse(AllEnvData);
+export const LatestEnvDataResponse = ApiSuccessResponse(EnvData);
 
 export type AllEnvDataResponse = z.infer<typeof AllEnvDataResponse>;
+export type LatestEnvDataResponse = z.infer<typeof LatestEnvDataResponse>;
