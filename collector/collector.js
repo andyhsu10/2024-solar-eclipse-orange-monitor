@@ -110,7 +110,7 @@ const processData = () => {
         })
         .catch(error => {
           console.log(sortedData, checksum)
-          console.error('Error sending data to API server:', error.message, error.response.data);
+          console.error('Error sending data to API server:', error);
         });
       }
     });

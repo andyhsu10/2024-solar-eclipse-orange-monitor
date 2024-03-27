@@ -1,16 +1,25 @@
 'use client';
 
-import { BarElement, CategoryScale, Chart, Legend, LinearScale, LineElement, PointElement, Tooltip } from 'chart.js';
+import {
+    BarElement, CategoryScale, Chart, Legend, LinearScale, LineElement, PointElement, Tooltip
+} from 'chart.js';
 import { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 
 import { getData } from '@/lib/api';
+import { pad } from '@/lib/utils';
 import { AllEnvDataResponse } from '@/types/backend.schema';
 import { faDroplet, faTemperatureHalf } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Switch } from '@headlessui/react';
 
-type Data = { timestamp: string; temperature: number; humidity: number; unixTimestamp: number };
+type Data = {
+  timestamp: string;
+  temperature: number;
+  humidity: number;
+  pressure: number;
+  unixTimestamp: number;
+};
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend);
 
@@ -26,45 +35,51 @@ export default function Home() {
   const [isCelsius, setIsCelsius] = useState<boolean>(true);
   const [isExpired, setIsExpired] = useState<boolean>(false);
 
-  useEffect(() => {
-    setInterval(() => {
-      getData()
-        .then((result: AllEnvDataResponse) => {
-          const mappedData = result.data.map((d) => {
-            const time = new Date(d.unix_timestamp);
+  const fetchData = () => {
+    getData()
+      .then((result: AllEnvDataResponse) => {
+        const mappedData = result.data.map((d) => {
+          const time = new Date(d.ts);
 
-            // Leading zero helper function
-            const pad = (number: number) => number.toString().padStart(2, '0');
+          // Format the date and time parts
+          const month = time.getMonth() + 1; // getMonth() returns 0-11
+          const day = time.getDate();
+          const hours = pad(time.getHours());
+          const minutes = pad(time.getMinutes());
+          const seconds = pad(time.getSeconds());
 
-            // Format the date and time parts
-            const month = time.getMonth() + 1; // getMonth() returns 0-11
-            const day = time.getDate();
-            const hours = pad(time.getHours());
-            const minutes = pad(time.getMinutes());
-            const seconds = pad(time.getSeconds());
+          // Build the formatted string
+          const formattedString = `${month}/${day} ${hours}:${minutes}:${seconds}`;
 
-            // Build the formatted string
-            const formattedString = `${month}/${day} ${hours}:${minutes}:${seconds}`;
-
-            return {
-              timestamp: formattedString,
-              temperature: d.temperature,
-              humidity: d.humidity,
-              unixTimestamp: d.unix_timestamp,
-            };
-          });
-          const lastData = mappedData.at(-1);
-
-          setEnvData(mappedData);
-          setLatestTemperature(lastData?.temperature);
-          setLatestHumidity(lastData?.humidity);
-          setLastUpdatedAt(lastData?.timestamp);
-          setIsExpired(lastData ? new Date().getDate() - lastData.unixTimestamp > 60 * 1000 : true);
-        })
-        .catch((error) => {
-          console.error(error);
+          return {
+            timestamp: formattedString,
+            temperature: d.t,
+            humidity: d.h,
+            pressure: d.p,
+            unixTimestamp: d.ts,
+          };
         });
-    }, 1000);
+        const lastData = mappedData.at(-1);
+
+        setEnvData(mappedData);
+        setLatestTemperature(lastData?.temperature);
+        setLatestHumidity(lastData?.humidity);
+        setLastUpdatedAt(lastData?.timestamp);
+        setIsExpired(lastData ? new Date().getDate() - lastData.unixTimestamp > 60 * 1000 : true);
+      })
+      .catch((error) => {
+        setIsExpired(true);
+        console.error(error);
+      });
+  };
+
+  useEffect(() => {
+    const dataInterval = setInterval(fetchData, 1000);
+
+    // Clean up the interval on component unmount
+    return () => {
+      clearInterval(dataInterval);
+    };
   }, []);
 
   return (

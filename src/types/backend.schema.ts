@@ -13,15 +13,16 @@ export const ApiFailedResponse = z.object({
 });
 
 export const EnvData = z.object({
-  id: z.number(),
-  created_at: z.string(),
-  unix_timestamp: z.number(),
-  temperature: z.number(),
-  humidity: z.number(),
+  ts: z.number(),
+  t: z.number(),
+  h: z.number(),
+  p: z.number(),
 });
 
 export const AllEnvData = z.array(EnvData);
 
 export const AllEnvDataResponse = ApiSuccessResponse(AllEnvData);
+export const LatestEnvDataResponse = ApiSuccessResponse(EnvData);
 
 export type AllEnvDataResponse = z.infer<typeof AllEnvDataResponse>;
+export type LatestEnvDataResponse = z.infer<typeof LatestEnvDataResponse>;

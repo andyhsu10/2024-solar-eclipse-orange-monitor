@@ -1,18 +1,45 @@
 import hashlib
 import json
 import math
+import os
 from flask import Blueprint, jsonify, request
-from google.cloud.firestore import FieldFilter
+from google.cloud.firestore import FieldFilter, Query
 
+from src.cloud_storage import bucket
 from src.config import settings
 from src.firestore import db
 
 data_bp = Blueprint("blueprint", __name__)
+data_ref = db.collection(f"environmental_data_{settings.ENVIRONMENT}")
 
 
 @data_bp.route("", methods=["GET", "POST"])
 def get_or_create_data():
-    data_ref = db.collection(f"environmental_data_{settings.ENVIRONMENT}")
+    def get_response_data():
+        data = (
+            data_ref.where(filter=FieldFilter("vs", "==", settings.DATA_VERSION))
+        ).get()
+        interval = get_interval(len(data))
+        filtered_data = list()
+        for i in range(len(data) - 1, -1, -interval):
+            d = data[i].to_dict()
+            filtered_data.append(
+                {
+                    "t": d.get("t"),
+                    "ts": int(data[i].id),
+                    "h": d.get("h"),
+                    "p": d.get("p"),
+                }
+            )
+        filtered_data.reverse()
+
+        response = {
+            "success": True,
+            "data": filtered_data,
+        }
+
+        return response
+
     # [POST] /data
     if request.method == "POST":
         auth_secret = request.headers.get("Authorization")
@@ -51,6 +78,7 @@ def get_or_create_data():
                 doc.set(
                     {
                         "t": temperature,
+                        "ts": timestamp,
                         "h": humidity,
                         "p": pressure,
                         "vs": settings.DATA_VERSION,
@@ -58,9 +86,26 @@ def get_or_create_data():
                 )
                 last_three_digits = timestamp % 1000
                 if last_three_digits < 500:
-                    # TODO: upload to GCS
-                    print(timestamp, last_three_digits)
-                    pass
+                    # upload to GCS
+                    try:
+                        response = get_response_data()
+                        response_str = json.dumps(response, separators=(",", ":"))
+                        filepath = os.path.join(
+                            (
+                                ""
+                                if settings.ENVIRONMENT == "production"
+                                else settings.ENVIRONMENT
+                            ),
+                            "data.json",
+                        )
+
+                        blob = bucket.blob(filepath)
+                        blob.cache_control = "public, max-age=1"
+                        blob.upload_from_string(
+                            response_str, content_type="application/json"
+                        )
+                    except Exception as err:
+                        print(err)
 
             return jsonify({"message": "Data processed successfully"}), 201
 
@@ -68,22 +113,37 @@ def get_or_create_data():
         return jsonify({"error": "Invalid JSON data"}), 400
 
     # [GET] /data
-    data = (
-        data_ref.where(filter=FieldFilter("version", "==", settings.DATA_VERSION))
-    ).get()
-    interval = get_interval(len(data))
-    response_data = list()
-    for i in range(len(data) - 1, -1, -interval):
-        d = data[i].to_dict()
-        response_data.append(
-            {
-                "t": d.get("t"),
-                "ts": int(data[i].id),
-                "h": d.get("h"),
-                "p": d.get("p"),
-            }
-        )
-    return jsonify({"success": True, "data": response_data}), 200
+    response = get_response_data()
+    return jsonify(response), 200
+
+
+@data_bp.route("latest", methods=["GET"])
+def get_latest_data():
+    query = (
+        (data_ref.where(filter=FieldFilter("vs", "==", settings.DATA_VERSION)))
+        .order_by("ts", direction=Query.DESCENDING)
+        .limit(1)
+        .get()
+    )
+    if len(query) == 0:
+        response = {
+            "success": True,
+            "data": None,
+        }
+    else:
+        snapshot = query[0]
+        data = snapshot.to_dict()
+        response = {
+            "success": True,
+            "data": {
+                "t": data.get("t"),
+                "ts": data.get("ts"),
+                "h": data.get("h"),
+                "p": data.get("p"),
+            },
+        }
+
+    return jsonify(response), 200
 
 
 def get_interval(num: int) -> int:
