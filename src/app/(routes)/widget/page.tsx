@@ -100,7 +100,7 @@ export default function Widget() {
 
   return (
     <main className="flex h-screen w-screen items-center justify-center p-4">
-      <div className="h-52 w-72 rounded-lg border border-gray-500 p-4 font-mono text-xl">
+      <div className="h-52 w-72 rounded-2xl border border-gray-300 bg-gray-300 p-4 font-mono text-xl">
         <p className="font-sans font-bold">2024 北美日全食</p>
         <p>{moment(currentTime).format('hh:mm:ss')} (UTC -5)</p>
         <p>
