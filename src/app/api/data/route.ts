@@ -5,7 +5,7 @@ import { RequestMethod, ServerApiUrl } from '@/types/enum';
 export async function GET(req: Request) {
   try {
     const response = await fetch(`${ServerApiUrl[RequestMethod.GET].getAllData()}`, {
-      next: { revalidate: 0.8 },
+      next: { revalidate: 1 },
     });
 
     const data = AllEnvDataResponse.parse(await response.json());
