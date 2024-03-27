@@ -1,6 +1,8 @@
 'use client';
 
-import { BarElement, CategoryScale, Chart, Legend, LinearScale, LineElement, PointElement, Tooltip } from 'chart.js';
+import {
+    BarElement, CategoryScale, Chart, Legend, LinearScale, LineElement, PointElement, Tooltip
+} from 'chart.js';
 import { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 
@@ -10,7 +12,13 @@ import { faDroplet, faTemperatureHalf } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Switch } from '@headlessui/react';
 
-type Data = { timestamp: string; temperature: number; humidity: number; unixTimestamp: number };
+type Data = {
+  timestamp: string;
+  temperature: number;
+  humidity: number;
+  pressure: number;
+  unixTimestamp: number;
+};
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend);
 
@@ -31,7 +39,7 @@ export default function Home() {
       getData()
         .then((result: AllEnvDataResponse) => {
           const mappedData = result.data.map((d) => {
-            const time = new Date(d.unix_timestamp);
+            const time = new Date(d.ts);
 
             // Leading zero helper function
             const pad = (number: number) => number.toString().padStart(2, '0');
@@ -48,9 +56,10 @@ export default function Home() {
 
             return {
               timestamp: formattedString,
-              temperature: d.temperature,
-              humidity: d.humidity,
-              unixTimestamp: d.unix_timestamp,
+              temperature: d.t,
+              humidity: d.h,
+              pressure: d.p,
+              unixTimestamp: d.ts,
             };
           });
           const lastData = mappedData.at(-1);
