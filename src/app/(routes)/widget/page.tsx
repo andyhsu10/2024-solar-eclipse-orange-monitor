@@ -4,7 +4,7 @@ import 'moment-timezone';
 
 import moment from 'moment';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 import { getLatestData } from '@/lib/api';
 import { pad } from '@/lib/utils';
@@ -38,7 +38,7 @@ const phases: Phase[] = [
   { name: '復圓', unixTimestamp: 1712606593000 },
 ];
 
-export default function Widget() {
+function Widget() {
   const searchParams = useSearchParams();
   const reverse = Boolean(searchParams.get('reverse'));
 
@@ -186,5 +186,13 @@ export default function Widget() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function WidgetPage() {
+  return (
+    <Suspense>
+      <Widget />
+    </Suspense>
   );
 }
