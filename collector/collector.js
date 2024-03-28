@@ -70,6 +70,8 @@ const processData = () => {
 
         if (humidity > 100)
           humidity = 100;
+        if (humidity < 0)
+          humidity = 0;
 
         const insert = 'INSERT INTO environmental_data (unix_timestamp, temperature, humidity, pressure) VALUES (?,?,?,?)';
         db.run(insert, [now.getTime(), temperature, humidity, pressure], (err, _) => {
