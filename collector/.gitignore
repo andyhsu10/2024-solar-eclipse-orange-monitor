@@ -42,5 +42,5 @@ next-env.d.ts
 
 # SQLite
 db.sqlite
-backend/backup/*.sqlite
-!backend/backup/template.db.sqlite
+backup/*.sqlite
+!backup/template.db.sqlite

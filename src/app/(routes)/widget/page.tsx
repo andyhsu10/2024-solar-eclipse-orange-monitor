@@ -117,7 +117,7 @@ function Widget() {
       >
         <p className="font-sans font-bold">2024 北美日全食</p>
         <p>
-          {moment(currentTime).format('hh:mm:ss')} (
+          {moment(currentTime).format('HH:mm:ss')} (
           <span className="inline-flex gap-2">
             UTC
             <span>
