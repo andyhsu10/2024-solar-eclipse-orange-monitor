@@ -36,7 +36,7 @@ setInterval(
   () => {
     const now = new Date();
     const sourceFilePath = 'db.sqlite';
-    const destinationFilePath = `collector/backup/${now.getTime()}.backup.sqlite`;
+    const destinationFilePath = `backup/${now.getTime()}.backup.sqlite`;
 
     // Copy the file
     fs.copyFile(sourceFilePath, destinationFilePath, (err) => {
