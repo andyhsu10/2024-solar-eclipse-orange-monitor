@@ -3,6 +3,7 @@
 import 'moment-timezone';
 
 import moment from 'moment';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { getLatestData } from '@/lib/api';
@@ -38,6 +39,9 @@ const phases: Phase[] = [
 ];
 
 export default function Widget() {
+  const searchParams = useSearchParams();
+  const reverse = Boolean(searchParams.get('reverse'));
+
   const [envData, setEnvData] = useState<Data | undefined>(undefined);
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [currentPhase, setCurrentPhase] = useState<Phase | undefined>(undefined);
@@ -108,7 +112,9 @@ export default function Widget() {
 
   return (
     <main className="flex h-screen w-screen items-center justify-center p-4">
-      <div className="h-52 w-72 overflow-hidden rounded-2xl border border-gray-300 bg-gray-300 p-4 font-mono text-xl">
+      <div
+        className={`h-52 w-72 overflow-hidden rounded-2xl border border-gray-300 bg-gray-300 p-4 font-mono text-xl ${reverse ? 'text-white' : 'text-black'}`}
+      >
         <p className="font-sans font-bold">2024 北美日全食</p>
         <p>
           {moment(currentTime).format('hh:mm:ss')} (
@@ -126,7 +132,7 @@ export default function Widget() {
             <>
               <span className="font-sans">{currentPhase.name}</span>{' '}
               <span>
-                {pad(phaseCountdown.hours)}:{pad(phaseCountdown.minutes)}:{pad(phaseCountdown.seconds)}
+                +{pad(phaseCountdown.hours)}:{pad(phaseCountdown.minutes)}:{pad(phaseCountdown.seconds)}
               </span>
             </>
           ) : (
@@ -134,10 +140,10 @@ export default function Widget() {
               {currentTime.getTime() > (phases.at(-1)?.unixTimestamp ?? 0) ? (
                 <>
                   <span className="font-sans">復圓</span>
-                  {' 00:00:00'}
+                  {' +00:00:00'}
                 </>
               ) : (
-                'N/A 00:00:00'
+                'N/A +00:00:00'
               )}
             </>
           )}

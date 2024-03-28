@@ -76,7 +76,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const dataInterval = setInterval(fetchData, 1000);
+    const dataInterval = setInterval(fetchData, 2 * 1000);
 
     // Clean up the interval on component unmount
     return () => {
