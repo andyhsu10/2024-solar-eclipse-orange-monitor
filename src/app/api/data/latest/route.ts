@@ -13,6 +13,6 @@ export async function GET(req: Request) {
     return Response.json({ success: true, data: data.data });
   } catch (err) {
     console.error(err);
-    return Response.json({ success: false, message: err });
+    return Response.json({ success: false, message: err }, { status: 500 });
   }
 }

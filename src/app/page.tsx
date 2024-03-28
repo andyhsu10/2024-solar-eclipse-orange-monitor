@@ -35,6 +35,7 @@ export default function Home() {
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | undefined>(undefined);
   const [isCelsius, setIsCelsius] = useState<boolean>(true);
   const [isExpired, setIsExpired] = useState<boolean>(false);
+  const [dataInterval, setDataInterval] = useState<NodeJS.Timeout | null>(null);
 
   const fetchData = () => {
     getData()
@@ -70,22 +71,27 @@ export default function Home() {
         setIsExpired(lastData ? new Date().getDate() - lastData.unixTimestamp > 60 * 1000 : true);
       })
       .catch((error) => {
+        if (dataInterval) {
+          clearInterval(dataInterval);
+          setDataInterval(null);
+        }
         setIsExpired(true);
         console.error(error);
       });
   };
 
   useEffect(() => {
-    const dataInterval = setInterval(fetchData, 2 * 1000);
+    const interval = setInterval(fetchData, 2 * 1000);
+    setDataInterval(interval);
 
     // Clean up the interval on component unmount
     return () => {
-      clearInterval(dataInterval);
+      clearInterval(interval);
     };
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-stone-200 p-24">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-stone-200 p-6 md:p-16 lg:p-24">
       <div className="z-10 flex min-h-[36rem] w-full max-w-6xl flex-col gap-8 md:flex-row">
         <div className="flex flex-col gap-5 pt-2 md:basis-1/4">
           <div className="-mb-2 flex items-center justify-center">
