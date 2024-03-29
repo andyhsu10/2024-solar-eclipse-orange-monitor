@@ -96,24 +96,27 @@ const processData = () => {
           .digest('hex');
         
         // Send data to Flask server
-        axios.post(`${SERVER_URL}/data`, sortedData, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': API_SECRET,
-            'X-Checksum': checksum,
-          },
-        })
-        .then(_ => {
-          const update = 'UPDATE environmental_data SET updated_at = CURRENT_TIMESTAMP, uploaded = TRUE WHERE unix_timestamp = ?';
-          db.run(update, [now.getTime()], (err, _) => {
-            if (err) console.error(err);
+        const seconds = now.getSeconds()
+        if (seconds % 2) {
+          axios.post(`${SERVER_URL}/data`, sortedData, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': API_SECRET,
+              'X-Checksum': checksum,
+            },
+          })
+          .then(_ => {
+            const update = 'UPDATE environmental_data SET updated_at = CURRENT_TIMESTAMP, uploaded = TRUE WHERE unix_timestamp = ?';
+            db.run(update, [now.getTime()], (err, _) => {
+              if (err) console.error(err);
+            });
+            console.log('Data uploaded:', sortedData);
+          })
+          .catch(error => {
+            console.log(sortedData, checksum)
+            console.error('Error sending data to API server:', error);
           });
-          console.log('Data uploaded:', sortedData);
-        })
-        .catch(error => {
-          console.log(sortedData, checksum)
-          console.error('Error sending data to API server:', error);
-        });
+        }
       }
     });
   });
