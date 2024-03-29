@@ -96,8 +96,7 @@ const processData = () => {
           .digest('hex');
         
         // Send data to Flask server
-        const seconds = now.getSeconds()
-        if (seconds % 2) {
+        if (now.getTime() % 2000 < 500) {
           axios.post(`${SERVER_URL}/data`, sortedData, {
             headers: {
               'Content-Type': 'application/json',
