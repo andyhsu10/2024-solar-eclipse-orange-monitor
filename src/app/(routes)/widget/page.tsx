@@ -46,7 +46,7 @@ function Widget() {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [currentPhase, setCurrentPhase] = useState<Phase | undefined>(undefined);
   const [phaseCountdown, setPhaseCountdown] = useState<Countdown>({ seconds: 0, minutes: 0, hours: 0 });
-  const [utcOffset, setUtcOffset] = useState<number>(0);
+  const [utcOffset, setUtcOffset] = useState<number>(-5);
 
   const fetchLatestData = () => {
     getLatestData()
@@ -101,7 +101,7 @@ function Widget() {
     }, 10 * 1000);
 
     // Set UTC Offset
-    setUtcOffset(moment().utcOffset() / 60);
+    setUtcOffset(moment().tz('America/Chicago').utcOffset() / 60);
 
     // Clean up the interval on component unmount
     return () => {
@@ -117,7 +117,7 @@ function Widget() {
       >
         <p className="font-sans font-bold">2024 北美日全食</p>
         <p>
-          {moment(currentTime).format('HH:mm:ss')} (
+          {moment(currentTime).tz('America/Chicago').format('HH:mm:ss')} (
           <span className="inline-flex gap-2">
             UTC
             <span>
