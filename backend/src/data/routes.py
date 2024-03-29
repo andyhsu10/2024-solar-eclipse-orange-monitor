@@ -84,28 +84,27 @@ def get_or_create_data():
                         "vs": settings.DATA_VERSION,
                     }
                 )
-                last_three_digits = timestamp % 1000
-                if last_three_digits < 500:
-                    # upload to GCS
-                    try:
-                        response = get_response_data()
-                        response_str = json.dumps(response, separators=(",", ":"))
-                        filepath = os.path.join(
-                            (
-                                ""
-                                if settings.ENVIRONMENT == "production"
-                                else settings.ENVIRONMENT
-                            ),
-                            "data.json",
-                        )
 
-                        blob = bucket.blob(filepath)
-                        blob.cache_control = "public, max-age=1"
-                        blob.upload_from_string(
-                            response_str, content_type="application/json"
-                        )
-                    except Exception as err:
-                        print(err)
+                # upload to GCS
+                try:
+                    response = get_response_data()
+                    response_str = json.dumps(response, separators=(",", ":"))
+                    filepath = os.path.join(
+                        (
+                            ""
+                            if settings.ENVIRONMENT == "production"
+                            else settings.ENVIRONMENT
+                        ),
+                        "data.json",
+                    )
+
+                    blob = bucket.blob(filepath)
+                    blob.cache_control = "public, max-age=1"
+                    blob.upload_from_string(
+                        response_str, content_type="application/json"
+                    )
+                except Exception as err:
+                    print(err)
 
             return jsonify({"message": "Data processed successfully"}), 201
 
