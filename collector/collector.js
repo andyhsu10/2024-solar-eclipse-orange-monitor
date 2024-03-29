@@ -79,24 +79,23 @@ const processData = () => {
         });
 
         // POST data to API server
-        const postData = {
-          h: humidity,
-          t: temperature,
-          ts: now.getTime(),
-          p: pressure,
-        };
-        const sortedData = Object.keys(postData).sort().reduce((acc, key) => {
-          acc[key] = postData[key];
-          return acc;
-        }, {});
-        const payload = JSON.stringify(sortedData);
-        const checksum = crypto
-          .createHash('sha256')
-          .update(payload + API_SECRET)
-          .digest('hex');
-        
-        // Send data to Flask server
         if (now.getTime() % 2000 < 500) {
+          const postData = {
+            h: humidity,
+            t: temperature,
+            ts: now.getTime(),
+            p: pressure,
+          };
+          const sortedData = Object.keys(postData).sort().reduce((acc, key) => {
+            acc[key] = postData[key];
+            return acc;
+          }, {});
+          const payload = JSON.stringify(sortedData);
+          const checksum = crypto
+            .createHash('sha256')
+            .update(payload + API_SECRET)
+            .digest('hex');
+
           axios.post(`${SERVER_URL}/data`, sortedData, {
             headers: {
               'Content-Type': 'application/json',
