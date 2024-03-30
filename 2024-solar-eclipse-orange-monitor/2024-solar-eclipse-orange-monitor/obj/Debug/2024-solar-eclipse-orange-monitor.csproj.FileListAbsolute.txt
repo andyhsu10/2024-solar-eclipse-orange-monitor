@@ -1,0 +1,11 @@
+C:\Airy\2024-solar-eclipse-orange-monitor\2024-solar-eclipse-orange-monitor\bin\Debug\2024-solar-eclipse-orange-monitor.exe.config
+C:\Airy\2024-solar-eclipse-orange-monitor\2024-solar-eclipse-orange-monitor\bin\Debug\2024-solar-eclipse-orange-monitor.exe
+C:\Airy\2024-solar-eclipse-orange-monitor\2024-solar-eclipse-orange-monitor\bin\Debug\2024-solar-eclipse-orange-monitor.pdb
+C:\Airy\2024-solar-eclipse-orange-monitor\2024-solar-eclipse-orange-monitor\obj\Debug\2024-solar-eclipse-orange-monitor.csproj.AssemblyReference.cache
+C:\Airy\2024-solar-eclipse-orange-monitor\2024-solar-eclipse-orange-monitor\obj\Debug\2024-solar-eclipse-orange-monitor.csproj.SuggestedBindingRedirects.cache
+C:\Airy\2024-solar-eclipse-orange-monitor\2024-solar-eclipse-orange-monitor\obj\Debug\_2024_solar_eclipse_orange_monitor.FrmMain.resources
+C:\Airy\2024-solar-eclipse-orange-monitor\2024-solar-eclipse-orange-monitor\obj\Debug\_2024_solar_eclipse_orange_monitor.Properties.Resources.resources
+C:\Airy\2024-solar-eclipse-orange-monitor\2024-solar-eclipse-orange-monitor\obj\Debug\2024-solar-eclipse-orange-monitor.csproj.GenerateResource.cache
+C:\Airy\2024-solar-eclipse-orange-monitor\2024-solar-eclipse-orange-monitor\obj\Debug\2024-solar-eclipse-orange-monitor.csproj.CoreCompileInputs.cache
+C:\Airy\2024-solar-eclipse-orange-monitor\2024-solar-eclipse-orange-monitor\obj\Debug\2024-solar-eclipse-orange-monitor.exe
+C:\Airy\2024-solar-eclipse-orange-monitor\2024-solar-eclipse-orange-monitor\obj\Debug\2024-solar-eclipse-orange-monitor.pdb
