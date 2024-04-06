@@ -94,7 +94,7 @@ function Widget() {
 
     const timePhaseInterval = setInterval(() => {
       updateCurrentTimeAndPhase();
-    }, 1000);
+    }, 300);
 
     const dataInterval = setInterval(() => {
       fetchLatestData();
