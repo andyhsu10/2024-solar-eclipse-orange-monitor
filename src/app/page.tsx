@@ -78,6 +78,9 @@ export default function Home() {
         }
         setIsExpired(true);
         console.error(error);
+
+        // Re-schedule the next call after 2 seconds
+        setTimeout(fetchData, 2 * 1000);
       });
   };
 
