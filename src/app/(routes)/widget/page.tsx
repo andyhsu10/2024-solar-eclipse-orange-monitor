@@ -66,6 +66,8 @@ function Widget() {
       })
       .catch((error) => {
         console.error(error);
+
+        setTimeout(fetchLatestData, 15 * 1000);
       });
   };
 
