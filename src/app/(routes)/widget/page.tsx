@@ -61,6 +61,8 @@ function Widget() {
             pressure: data.p,
           });
         }
+
+        setTimeout(fetchLatestData, 15 * 1000);
       })
       .catch((error) => {
         console.error(error);
@@ -94,11 +96,7 @@ function Widget() {
 
     const timePhaseInterval = setInterval(() => {
       updateCurrentTimeAndPhase();
-    }, 1000);
-
-    const dataInterval = setInterval(() => {
-      fetchLatestData();
-    }, 10 * 1000);
+    }, 400);
 
     // Set UTC Offset
     setUtcOffset(moment().tz('America/Chicago').utcOffset() / 60);
@@ -106,7 +104,6 @@ function Widget() {
     // Clean up the interval on component unmount
     return () => {
       clearInterval(timePhaseInterval);
-      clearInterval(dataInterval);
     };
   }, []);
 
