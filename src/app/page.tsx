@@ -66,7 +66,10 @@ export default function Home() {
         setLatestHumidity(lastData?.humidity);
         setLatestPressure(lastData?.pressure);
         setLastUpdatedAt(lastData?.timestamp);
-        setIsExpired(lastData ? new Date().getDate() - lastData.unixTimestamp > 60 * 1000 : true);
+        setIsExpired(lastData ? new Date().getTime() - lastData.unixTimestamp > 60 * 1000 : true);
+
+        // Schedule the next call after 2 seconds
+        setTimeout(fetchData, 2 * 1000);
       })
       .catch((error) => {
         if (dataInterval) {
@@ -79,13 +82,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const interval = setInterval(fetchData, 15 * 1000);
-    setDataInterval(interval);
-
-    // Clean up the interval on component unmount
-    return () => {
-      clearInterval(interval);
-    };
+    fetchData();
   }, []);
 
   return (
