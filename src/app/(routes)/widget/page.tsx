@@ -31,11 +31,11 @@ type Countdown = {
 };
 
 const phases: Phase[] = [
-  { name: '初虧', unixTimestamp: 1712597680000 },
-  { name: '食既', unixTimestamp: 1712602293000 },
-  { name: '食甚', unixTimestamp: 1712602421000 },
-  { name: '生光', unixTimestamp: 1712602548000 },
-  { name: '復圓', unixTimestamp: 1712607123000 },
+  { name: '初虧', unixTimestamp: 1712597683000 },
+  { name: '食既', unixTimestamp: 1712602295000 },
+  { name: '食甚', unixTimestamp: 1712602423000 },
+  { name: '生光', unixTimestamp: 1712602550000 },
+  { name: '復圓', unixTimestamp: 1712607125000 },
 ];
 
 function Widget() {
