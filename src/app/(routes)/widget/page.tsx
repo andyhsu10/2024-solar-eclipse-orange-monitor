@@ -31,11 +31,11 @@ type Countdown = {
 };
 
 const phases: Phase[] = [
-  { name: '初虧', unixTimestamp: 1712597017000 },
-  { name: '食既', unixTimestamp: 1712601656000 },
-  { name: '食甚', unixTimestamp: 1712601787000 },
-  { name: '生光', unixTimestamp: 1712601918000 },
-  { name: '復圓', unixTimestamp: 1712606593000 },
+  { name: '初虧', unixTimestamp: 1712597680000 },
+  { name: '食既', unixTimestamp: 1712602293000 },
+  { name: '食甚', unixTimestamp: 1712602421000 },
+  { name: '生光', unixTimestamp: 1712602548000 },
+  { name: '復圓', unixTimestamp: 1712607123000 },
 ];
 
 function Widget() {
@@ -98,7 +98,7 @@ function Widget() {
 
     const timePhaseInterval = setInterval(() => {
       updateCurrentTimeAndPhase();
-    }, 400);
+    }, 200);
 
     // Set UTC Offset
     setUtcOffset(moment().tz('America/Chicago').utcOffset() / 60);
