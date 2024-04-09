@@ -8,6 +8,8 @@ import { useState } from 'react';
 import { Line } from 'react-chartjs-2';
 
 import { ENVIRONMENT_DATA } from '@/constants/data';
+import { faClock, faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Switch } from '@headlessui/react';
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend);
@@ -20,9 +22,20 @@ export default function DataPage() {
   const [isCelsius, setIsCelsius] = useState<boolean>(true);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 md:p-16 lg:p-24">
-      <div className="z-10 flex min-h-[36rem] w-full max-w-6xl flex-col gap-8">
-        <div className="-mb-2 flex items-center justify-center">
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 py-10 md:px-16 lg:px-24">
+      <div className="flex min-h-[36rem] w-full max-w-6xl flex-col gap-8">
+        <div className="text-center text-gray-700">
+          <p className="inline-flex items-center gap-2">
+            <FontAwesomeIcon icon={faLocationDot} fixedWidth />
+            Location: Archey Creek Park, Clinton, AR, USA (35°35'51.2"N 92°27'16.6"W)
+          </p>
+          <p className="inline-flex items-center gap-2">
+            <FontAwesomeIcon icon={faClock} fixedWidth />
+            Time Duration (UTC -5): 2024-04-08 12:52:28 ~ 2024-04-08 15:18:58
+          </p>
+        </div>
+
+        <div className="flex items-center justify-center">
           <div className="flex items-center gap-2">
             <span className="font-sans text-xl font-medium">°C</span>
             <Switch
@@ -165,6 +178,51 @@ export default function DataPage() {
               },
             }}
           />
+        </div>
+
+        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <table className="w-full text-left text-sm text-gray-700 rtl:text-right">
+            <thead className="bg-gray-50 text-xs">
+              <tr>
+                <th scope="col" className="px-6 py-3">
+                  #
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  TIME (UTC -5)
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  TEMPERATURE (°C)
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  HUMIDITY (%)
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  ATMOSPHERIC PRESSURE (hPa)
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {ENVIRONMENT_DATA.map((data, index) => {
+                return (
+                  <tr
+                    className={`${index < ENVIRONMENT_DATA.length - 1 ? 'border-b' : ''} border-gray-300 bg-white hover:bg-gray-50`}
+                    key={`data-${index}`}
+                  >
+                    <th scope="row" className="whitespace-nowrap px-6 py-4 font-medium">
+                      {index + 1}
+                    </th>
+                    <td className="px-6 py-4">
+                      {moment(data.timestamp).tz('America/Chicago').format('YYYY-MM-DD HH:mm:ss')}
+                    </td>
+                    <td className="px-6 py-4">{data.temperature}</td>
+                    <td className="px-6 py-4">{data.humidity}</td>
+                    <td className="px-6 py-4">{data.pressure}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </main>
