@@ -4,11 +4,12 @@ import 'moment-timezone';
 
 import { BarElement, CategoryScale, Chart, Legend, LinearScale, LineElement, PointElement, Tooltip } from 'chart.js';
 import moment from 'moment';
+import Link from 'next/link';
 import { useState } from 'react';
 import { Line } from 'react-chartjs-2';
 
 import { ENVIRONMENT_DATA } from '@/constants/data';
-import { faClock, faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { faClock, faDownload, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Switch } from '@headlessui/react';
 
@@ -24,14 +25,39 @@ export default function DataPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 py-10 md:px-16 lg:px-24">
       <div className="flex min-h-[36rem] w-full max-w-6xl flex-col gap-8">
-        <div className="text-center text-gray-700">
+        <div className="flex flex-col items-center gap-1 text-gray-700">
           <p className="inline-flex items-center gap-2">
-            <FontAwesomeIcon icon={faLocationDot} fixedWidth />
+            <FontAwesomeIcon icon={faLocationDot} className="max-h-4" fixedWidth />
             Location: Archey Creek Park, Clinton, AR, USA (35°35'51.2"N 92°27'16.6"W)
           </p>
+
           <p className="inline-flex items-center gap-2">
-            <FontAwesomeIcon icon={faClock} fixedWidth />
+            <FontAwesomeIcon icon={faClock} className="max-h-4" fixedWidth />
             Time Duration (UTC -5): 2024-04-08 12:52:28 ~ 2024-04-08 15:18:58
+          </p>
+
+          <p className="inline-flex items-center gap-2">
+            <FontAwesomeIcon icon={faDownload} className="max-h-4" fixedWidth />
+
+            <Link
+              href={'raw_data.json'}
+              className="hover:text-blue-500 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+              locale={false}
+            >
+              raw_data.json
+            </Link>
+
+            <Link
+              href={'raw_data.csv'}
+              className="hover:text-blue-500 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+              locale={false}
+            >
+              raw_data.csv
+            </Link>
           </p>
         </div>
 
